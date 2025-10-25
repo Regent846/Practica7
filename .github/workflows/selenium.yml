@@ -32,19 +32,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y google-chrome-stable
 
-    - name: Get Chrome version
-      id: chrome-version
-      run: |
-        CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+')
-        echo "Chrome version: $CHROME_VERSION"
-        echo "CHROME_MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d'.' -f1)" >> $GITHUB_ENV
-
     - name: Install ChromeDriver
       run: |
-        CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${{ env.CHROME_MAJOR_VERSION }}")
-        wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
-        unzip chromedriver-linux64.zip
-        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+        CHROMEDRIVER_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+        wget -q "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
+        unzip chromedriver_linux64.zip
+        sudo mv chromedriver /usr/local/bin/
         sudo chmod +x /usr/local/bin/chromedriver
         chromedriver --version
 
@@ -57,11 +50,4 @@ jobs:
       with:
         name: selenium-test-report
         path: selenium-report.html
-        retention-days: 30
-
-    - name: Upload HTML File
-      uses: actions/upload-artifact@v4
-      with:
-        name: todo-app-html
-        path: ToDoList.html
         retention-days: 30

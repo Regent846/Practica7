@@ -3,27 +3,26 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 import pytest
 import os
 import time
-import tempfile
 
 
 class TestTodoApp:
     @pytest.fixture(autouse=True)
     def setup(self):
-        # Создаем уникальную временную папку для каждого теста чтобы избежать конфликтов
-        temp_dir = tempfile.mkdtemp()
-
-        # Настраиваем Chrome options для избежания конфликтов
+        # Настройка Chrome options для GitHub Actions
         chrome_options = Options()
-        chrome_options.add_argument(f"--user-data-dir={temp_dir}")
+        chrome_options.add_argument("--headless")  # Обязательно для CI
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--window-size=1920,1080")
 
+        # Используем ChromeDriver без user-data-dir чтобы избежать конфликтов
         self.driver = webdriver.Chrome(options=chrome_options)
-        # Абсолютный путь к HTML файлу
-        html_path = os.path.abspath("ToDoList.html")
+        html_path = os.path.abspath("ToDoList.html") # Абсолютный путь к HTML файлу
         self.driver.get(f"file://{html_path}")
         self.wait = WebDriverWait(self.driver, 10)
         yield
