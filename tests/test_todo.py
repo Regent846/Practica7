@@ -2,17 +2,27 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
 import pytest
 import os
 import time
+import tempfile
 
 
 class TestTodoApp:
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.driver = webdriver.Chrome()
-        # Получаем абсолютный путь к HTML файлу
+        # Создаем уникальную временную папку для каждого теста чтобы избежать конфликтов
+        temp_dir = tempfile.mkdtemp()
+
+        # Настраиваем Chrome options для избежания конфликтов
+        chrome_options = Options()
+        chrome_options.add_argument(f"--user-data-dir={temp_dir}")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+
+        self.driver = webdriver.Chrome(options=chrome_options)
+        # Абсолютный путь к HTML файлу
         html_path = os.path.abspath("ToDoList.html")
         self.driver.get(f"file://{html_path}")
         self.wait = WebDriverWait(self.driver, 10)
@@ -20,7 +30,7 @@ class TestTodoApp:
         self.driver.quit()
 
     def test_add_task(self):
-        """Тест добавления новой задачи"""
+        # Тест добавления новой задачи
         # Находим элементы
         input_field = self.wait.until(EC.presence_of_element_located((By.TAG_NAME, "input")))
         add_button = self.driver.find_element(By.TAG_NAME, "button")
@@ -36,7 +46,7 @@ class TestTodoApp:
         assert len(self.driver.find_elements(By.CLASS_NAME, "todo")) == 1
 
     def test_add_empty_task(self):
-        """Тест попытки добавления пустой задачи"""
+        # Тест попытки добавления пустой задачи
         input_field = self.driver.find_element(By.TAG_NAME, "input")
         add_button = self.driver.find_element(By.TAG_NAME, "button")
 
@@ -56,7 +66,7 @@ class TestTodoApp:
             pytest.fail("Alert не появился при добавлении пустой задачи")
 
     def test_delete_task(self):
-        """Тест удаления задачи"""
+        # Тест удаления задачи
         # Сначала добавляем задачу
         input_field = self.driver.find_element(By.TAG_NAME, "input")
         add_button = self.driver.find_element(By.TAG_NAME, "button")
@@ -77,7 +87,7 @@ class TestTodoApp:
         assert len(tasks) == 0
 
     def test_edit_task(self):
-        """Тест редактирования задачи"""
+        # Тест редактирования задачи
         # Добавляем задачу
         input_field = self.driver.find_element(By.TAG_NAME, "input")
         add_button = self.driver.find_element(By.TAG_NAME, "button")
@@ -102,7 +112,7 @@ class TestTodoApp:
         assert "Отредактированная задача" in task_element.text
 
     def test_multiple_tasks(self):
-        """Тест добавления нескольких задач"""
+        # Тест добавления нескольких задач
         input_field = self.driver.find_element(By.TAG_NAME, "input")
         add_button = self.driver.find_element(By.TAG_NAME, "button")
 
@@ -123,7 +133,7 @@ class TestTodoApp:
             assert task_text in task_texts
 
     def test_local_storage_persistence(self):
-        """Тест сохранения задач в Local Storage"""
+        # Тест сохранения задач в Local Storage
         # Добавляем задачу
         input_field = self.driver.find_element(By.TAG_NAME, "input")
         add_button = self.driver.find_element(By.TAG_NAME, "button")
