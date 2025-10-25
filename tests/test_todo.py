@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 import pytest
 import os
@@ -20,9 +21,12 @@ class TestTodoApp:
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
 
-        # Используем ChromeDriver без user-data-dir чтобы избежать конфликтов
-        self.driver = webdriver.Chrome(options=chrome_options)
-        html_path = os.path.abspath("ToDoList.html") # Абсолютный путь к HTML файлу
+        # Используем webdriver-manager для автоматической установки правильного ChromeDriver
+        service = Service(ChromeDriverManager().install())
+        self.driver = webdriver.Chrome(service=service, options=chrome_options)
+
+        # Абсолютный путь к HTML файлу
+        html_path = os.path.abspath("ToDoList.html")
         self.driver.get(f"file://{html_path}")
         self.wait = WebDriverWait(self.driver, 10)
         yield
