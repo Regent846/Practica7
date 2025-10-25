@@ -3,8 +3,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service
 import pytest
 import os
 import time
@@ -21,9 +19,8 @@ class TestTodoApp:
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
 
-        # Используем webdriver-manager для автоматической установки правильного ChromeDriver
-        service = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        # Современный Selenium (4.15.0+) автоматически управляет драйверами через Selenium Manager
+        self.driver = webdriver.Chrome(options=chrome_options)
 
         # Абсолютный путь к HTML файлу
         html_path = os.path.abspath("ToDoList.html")
